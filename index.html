@@ -12,6 +12,35 @@
     <script>
       var unityInstance;
 
+      function ensureMobileControls() {
+        var container = document.getElementById("unityContainer");
+        if (!container) return null;
+
+        var controls = document.getElementById("mobileControls");
+        if (controls) return controls;
+
+        controls = document.createElement("div");
+        controls.id = "mobileControls";
+        controls.className = "mobile-controls";
+        controls.setAttribute("aria-label", "Mobile Steuerung");
+        controls.innerHTML = [
+          '<button class="btn up" data-key="ArrowUp" aria-label="Springen">▲</button>',
+          '<button class="btn down" data-key="ArrowDown" aria-label="Runter">▼</button>'
+        ].join("");
+
+        container.appendChild(controls);
+        return controls;
+      }
+
+      function revealMobileControls() {
+        var controls = ensureMobileControls();
+        if (!controls) return;
+
+        if (window.matchMedia("(hover: none) and (pointer: coarse)").matches) {
+          controls.classList.add("is-visible");
+        }
+      }
+
       function resizeUnityContainer() {
         var container = document.getElementById("unityContainer");
         if (!container) return;
@@ -40,7 +69,7 @@
       }
 
       function setupMobileControls() {
-        var controls = document.getElementById("mobileControls");
+        var controls = ensureMobileControls();
         if (!controls) return;
 
         function emitKey(type, key) {
@@ -96,6 +125,12 @@
         unityInstance = UnityLoader.instantiate("unityContainer", "Build/WebKimiRun.json", { onProgress: UnityProgress });
         setupMobileControls();
         resizeUnityContainer();
+
+        var container = document.getElementById("unityContainer");
+        if (container) {
+          container.addEventListener("touchstart", revealMobileControls, { passive: true, once: true });
+          container.addEventListener("mousedown", revealMobileControls, { once: true });
+        }
       });
 
       window.addEventListener("resize", resizeUnityContainer);
@@ -104,12 +139,7 @@
   </head>
   <body>
     <div class="webgl-content">
-      <div id="unityContainer">
-        <div id="mobileControls" class="mobile-controls" aria-label="Mobile Steuerung">
-          <button class="btn down" data-key="ArrowDown" aria-label="Runter">▼</button>
-          <button class="btn up" data-key="ArrowUp" aria-label="Springen">▲</button>
-        </div>
-      </div>
+      <div id="unityContainer"></div>
       <div class="footer">
         <div class="webgl-logo"></div>
         <div class="fullscreen" onclick="unityInstance.SetFullscreen(1)"></div>
