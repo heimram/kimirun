@@ -14,6 +14,17 @@ html, body {
 	max-width: 100vw;
 	max-height: 100vh;
 	background: #000;
+	position: relative;
+	overflow: hidden;
+}
+
+#unityContainer:fullscreen,
+#unityContainer:-webkit-full-screen,
+#unityContainer:-ms-fullscreen {
+	width: 100vw !important;
+	height: 100vh !important;
+	max-width: none;
+	max-height: none;
 }
 
 .webgl-content .logo, .progress {position: absolute; left: 50%; top: 50%; -webkit-transform: translate(-50%, -50%); transform: translate(-50%, -50%);}
@@ -65,21 +76,15 @@ html, body {
 	}
 
 	.mobile-controls {
-		position: fixed;
-		left: 0;
-		right: 0;
-		bottom: calc(env(safe-area-inset-bottom, 0px) + 8px);
+		position: absolute;
+		inset: 0;
 		z-index: 9999;
-		display: grid;
-		grid-template-columns: 72px 72px 72px;
-		grid-template-rows: 72px 72px;
-		gap: 10px;
-		justify-content: center;
-		align-content: end;
+		display: block;
 		pointer-events: none;
 	}
 
 	.mobile-controls .btn {
+		position: absolute;
 		pointer-events: auto;
 		border: 0;
 		border-radius: 14px;
@@ -91,6 +96,9 @@ html, body {
 		touch-action: none;
 		user-select: none;
 		-webkit-user-select: none;
+		width: 72px;
+		height: 72px;
+		bottom: calc(env(safe-area-inset-bottom, 0px) + 12px);
 	}
 
 	.mobile-controls .btn.active {
@@ -98,8 +106,11 @@ html, body {
 		transform: scale(0.96);
 	}
 
-	.mobile-controls .up { grid-column: 2; grid-row: 1; }
-	.mobile-controls .left { grid-column: 1; grid-row: 2; }
-	.mobile-controls .down { grid-column: 2; grid-row: 2; }
-	.mobile-controls .right { grid-column: 3; grid-row: 2; }
+	.mobile-controls .down {
+		left: 12px;
+	}
+
+	.mobile-controls .up {
+		right: 12px;
+	}
 }

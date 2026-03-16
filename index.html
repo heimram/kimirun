@@ -104,18 +104,17 @@
   </head>
   <body>
     <div class="webgl-content">
-      <div id="unityContainer"></div>
+      <div id="unityContainer">
+        <div id="mobileControls" class="mobile-controls" aria-label="Mobile Steuerung">
+          <button class="btn down" data-key="ArrowDown" aria-label="Runter">▼</button>
+          <button class="btn up" data-key="ArrowUp" aria-label="Springen">▲</button>
+        </div>
+      </div>
       <div class="footer">
         <div class="webgl-logo"></div>
         <div class="fullscreen" onclick="unityInstance.SetFullscreen(1)"></div>
         <div class="title">Kimi Hindernislauf</div>
       </div>
-    </div>
-    <div id="mobileControls" class="mobile-controls" aria-label="Mobile Steuerung">
-      <button class="btn up" data-key="ArrowUp" aria-label="Springen">▲</button>
-      <button class="btn left" data-key="ArrowLeft" aria-label="Links">◀</button>
-      <button class="btn down" data-key="ArrowDown" aria-label="Runter">▼</button>
-      <button class="btn right" data-key="ArrowRight" aria-label="Rechts">▶</button>
     </div>
   </body>
 </html>
