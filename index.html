@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>Unity WebGL Player | Kimi Hindernislauf</title>
+    <link rel="shortcut icon" href="TemplateData/favicon.ico">
+    <link rel="stylesheet" href="TemplateData/style.css">
+    <script src="TemplateData/UnityProgress.js"></script>
+    <script src="Build/UnityLoader.js"></script>
+    <script>
+      var unityInstance;
+
+      function resizeUnityContainer() {
+        var container = document.getElementById("unityContainer");
+        if (!container) return;
+
+        var baseWidth = 960;
+        var baseHeight = 600;
+        var ratio = baseWidth / baseHeight;
+        var viewportWidth = window.innerWidth;
+        var viewportHeight = window.innerHeight;
+        var footer = document.querySelector(".footer");
+        var footerHeight = footer ? footer.offsetHeight + 14 : 52;
+        var touchRoom = viewportWidth <= 1024 ? 170 : 0;
+        var maxWidth = Math.max(280, viewportWidth - 16);
+        var maxHeight = Math.max(220, viewportHeight - footerHeight - touchRoom);
+
+        var width = maxWidth;
+        var height = Math.round(width / ratio);
+
+        if (height > maxHeight) {
+          height = maxHeight;
+          width = Math.round(height * ratio);
+        }
+
+        container.style.width = width + "px";
+        container.style.height = height + "px";
+      }
+
+      function setupMobileControls() {
+        var controls = document.getElementById("mobileControls");
+        if (!controls) return;
+
+        function emitKey(type, key) {
+          var keyCodeMap = {
+            ArrowUp: 38,
+            ArrowDown: 40,
+            ArrowLeft: 37,
+            ArrowRight: 39
+          };
+          var keyCode = keyCodeMap[key] || 0;
+
+          var event = new KeyboardEvent(type, {
+            key: key,
+            code: key,
+            keyCode: keyCode,
+            which: keyCode,
+            bubbles: true,
+            cancelable: true
+          });
+
+          document.dispatchEvent(event);
+          window.dispatchEvent(event);
+        }
+
+        function bindButton(btn) {
+          var key = btn.getAttribute("data-key");
+          if (!key) return;
+
+          var press = function (e) {
+            e.preventDefault();
+            emitKey("keydown", key);
+            btn.classList.add("active");
+          };
+
+          var release = function (e) {
+            e.preventDefault();
+            emitKey("keyup", key);
+            btn.classList.remove("active");
+          };
+
+          btn.addEventListener("touchstart", press, { passive: false });
+          btn.addEventListener("touchend", release, { passive: false });
+          btn.addEventListener("touchcancel", release, { passive: false });
+          btn.addEventListener("mousedown", press);
+          btn.addEventListener("mouseup", release);
+          btn.addEventListener("mouseleave", release);
+        }
+
+        controls.querySelectorAll(".btn").forEach(bindButton);
+      }
+
+      document.addEventListener("DOMContentLoaded", function () {
+        unityInstance = UnityLoader.instantiate("unityContainer", "Build/WebKimiRun.json", { onProgress: UnityProgress });
+        setupMobileControls();
+        resizeUnityContainer();
+      });
+
+      window.addEventListener("resize", resizeUnityContainer);
+      window.addEventListener("orientationchange", resizeUnityContainer);
+    </script>
+  </head>
+  <body>
+    <div class="webgl-content">
+      <div id="unityContainer"></div>
+      <div class="footer">
+        <div class="webgl-logo"></div>
+        <div class="fullscreen" onclick="unityInstance.SetFullscreen(1)"></div>
+        <div class="title">Kimi Hindernislauf</div>
+      </div>
+    </div>
+    <div id="mobileControls" class="mobile-controls" aria-label="Mobile Steuerung">
+      <button class="btn up" data-key="ArrowUp" aria-label="Springen">▲</button>
+      <button class="btn left" data-key="ArrowLeft" aria-label="Links">◀</button>
+      <button class="btn down" data-key="ArrowDown" aria-label="Runter">▼</button>
+      <button class="btn right" data-key="ArrowRight" aria-label="Rechts">▶</button>
+    </div>
+  </body>
+</html>
