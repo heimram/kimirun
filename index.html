@@ -32,10 +32,17 @@
         var LONG_PRESS_MS = 250;
         var longPressTimer = null;
         var isLongPress = false;
+        var isTouchActive = false;
+
+        function isCanvasTarget(target) {
+          return target && target.tagName === "CANVAS";
+        }
 
         container.addEventListener("touchstart", function (e) {
+          if (!isCanvasTarget(e.target)) return;
           e.preventDefault();
           isLongPress = false;
+          isTouchActive = true;
           longPressTimer = setTimeout(function () {
             isLongPress = true;
             emitKey("keydown", "ArrowDown");
@@ -43,6 +50,7 @@
         }, { passive: false });
 
         container.addEventListener("touchend", function (e) {
+          if (!isTouchActive) return;
           e.preventDefault();
           clearTimeout(longPressTimer);
           if (isLongPress) {
@@ -52,12 +60,15 @@
             setTimeout(function () { emitKey("keyup", "ArrowUp"); }, 80);
           }
           isLongPress = false;
+          isTouchActive = false;
         }, { passive: false });
 
         container.addEventListener("touchcancel", function () {
+          if (!isTouchActive) return;
           clearTimeout(longPressTimer);
           if (isLongPress) emitKey("keyup", "ArrowDown");
           isLongPress = false;
+          isTouchActive = false;
         });
       }
 
@@ -89,6 +100,17 @@
       }
 
       (function () {
+        if (window.UnityLoader && UnityLoader.compatibilityCheck) {
+          var _compatibilityCheck = UnityLoader.compatibilityCheck;
+          UnityLoader.compatibilityCheck = function (instance, onSuccess, onError) {
+            if (UnityLoader.SystemInfo && UnityLoader.SystemInfo.hasWebGL) {
+              onSuccess();
+              return;
+            }
+            return _compatibilityCheck.call(this, instance, onSuccess, onError);
+          };
+        }
+
         var _confirm = window.confirm;
         window.confirm = function (msg) {
           if (msg && (msg.indexOf("Unity WebGL") !== -1 || msg.indexOf("mobile") !== -1)) return true;
