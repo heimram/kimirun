@@ -83,9 +83,8 @@
         var viewportHeight = window.innerHeight;
         var footer = document.querySelector(".footer");
         var footerHeight = footer ? footer.offsetHeight + 14 : 52;
-        var touchRoom = viewportWidth <= 1024 ? 170 : 0;
         var maxWidth = Math.max(280, viewportWidth - 16);
-        var maxHeight = Math.max(220, viewportHeight - footerHeight - touchRoom);
+        var maxHeight = Math.max(220, viewportHeight - footerHeight);
 
         var width = maxWidth;
         var height = Math.round(width / ratio);

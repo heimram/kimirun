@@ -49,6 +49,7 @@ html, body {
 	background: #000;
 	position: relative;
 	overflow: hidden;
+	box-sizing: border-box;
 }
 
 #unityContainer:fullscreen,
@@ -62,6 +63,11 @@ html, body {
 	position: fixed !important;
 	top: 0 !important;
 	left: 0 !important;
+	padding-top: env(safe-area-inset-top, 0px);
+	padding-right: env(safe-area-inset-right, 0px);
+	padding-bottom: env(safe-area-inset-bottom, 0px);
+	padding-left: env(safe-area-inset-left, 0px);
+	box-sizing: border-box;
 }
 
 #unityContainer:fullscreen canvas,
@@ -89,6 +95,14 @@ html, body {
 .webgl-content .footer .fullscreen {background-image: url('fullscreen.png'); width: 38px; float: right;}
 
 @media (hover: none) and (pointer: coarse) {
+	#unityContainer {
+		padding-top: env(safe-area-inset-top, 0px);
+		padding-right: env(safe-area-inset-right, 0px);
+		padding-bottom: env(safe-area-inset-bottom, 0px);
+		padding-left: env(safe-area-inset-left, 0px);
+		box-sizing: border-box;
+	}
+
 	.webgl-content {
 		position: fixed;
 		top: 0;
