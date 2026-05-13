@@ -159,6 +159,14 @@
         canvas.style.height = height + "px";
       }
 
+      function startCanvasLayoutWatcher() {
+        function tick() {
+          layoutUnityCanvas();
+          window.requestAnimationFrame(tick);
+        }
+        window.requestAnimationFrame(tick);
+      }
+
       (function () {
         if (window.UnityLoader && UnityLoader.compatibilityCheck) {
           var _compatibilityCheck = UnityLoader.compatibilityCheck;
@@ -184,10 +192,15 @@
       })();
 
       document.addEventListener("DOMContentLoaded", function () {
+        if (window.UnityLoader && UnityLoader.SystemInfo) {
+          UnityLoader.SystemInfo.mobile = false;
+        }
+
         unityInstance = UnityLoader.instantiate("unityContainer", "Build/WebKimiRun.json", { onProgress: UnityProgress });
         setupTouchControls();
         resizeUnityContainer();
         layoutUnityCanvas();
+        startCanvasLayoutWatcher();
         checkOrientation();
       });
 
