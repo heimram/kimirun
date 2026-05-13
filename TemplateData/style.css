@@ -1,3 +1,36 @@
+.rotate-overlay {
+	display: none;
+	position: fixed;
+	inset: 0;
+	z-index: 99999;
+	background: #111;
+	color: #fff;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 20px;
+	font-family: Helvetica, Verdana, Arial, sans-serif;
+	text-align: center;
+	padding: 24px;
+}
+
+.rotate-overlay .rotate-icon {
+	font-size: 80px;
+	animation: rotate-hint 1.5s ease-in-out infinite;
+}
+
+.rotate-overlay p {
+	font-size: 20px;
+	margin: 0;
+}
+
+@keyframes rotate-hint {
+	0%   { transform: rotate(0deg); }
+	40%  { transform: rotate(90deg); }
+	60%  { transform: rotate(90deg); }
+	100% { transform: rotate(0deg); }
+}
+
 .webgl-content * {border: 0; margin: 0; padding: 0}
 .webgl-content {position: absolute; top: 50%; left: 50%; -webkit-transform: translate(-50%, -50%); transform: translate(-50%, -50%);}
 
@@ -20,11 +53,23 @@ html, body {
 
 #unityContainer:fullscreen,
 #unityContainer:-webkit-full-screen,
+#unityContainer:-moz-full-screen,
 #unityContainer:-ms-fullscreen {
 	width: 100vw !important;
 	height: 100vh !important;
-	max-width: none;
-	max-height: none;
+	max-width: none !important;
+	max-height: none !important;
+	position: fixed !important;
+	top: 0 !important;
+	left: 0 !important;
+}
+
+#unityContainer:fullscreen canvas,
+#unityContainer:-webkit-full-screen canvas,
+#unityContainer:-moz-full-screen canvas,
+#unityContainer:-ms-fullscreen canvas {
+	width: 100% !important;
+	height: 100% !important;
 }
 
 .webgl-content .logo, .progress {position: absolute; left: 50%; top: 50%; -webkit-transform: translate(-50%, -50%); transform: translate(-50%, -50%);}
@@ -42,10 +87,6 @@ html, body {
 .webgl-content .footer .webgl-logo {background-image: url('webgl-logo.png'); width: 204px; float: left;}
 .webgl-content .footer .title {margin-right: 10px; float: right;}
 .webgl-content .footer .fullscreen {background-image: url('fullscreen.png'); width: 38px; float: right;}
-
-.mobile-controls {
-	display: none;
-}
 
 @media (hover: none) and (pointer: coarse) {
 	.webgl-content {
@@ -74,42 +115,4 @@ html, body {
 		width: 140px;
 		background-size: contain;
 	}
-
-	.mobile-controls {
-		position: absolute;
-		left: 12px;
-		bottom: calc(env(safe-area-inset-bottom, 0px) + 12px);
-		z-index: 9999;
-		display: none;
-		flex-direction: column;
-		gap: 10px;
-		pointer-events: none;
-	}
-
-	.mobile-controls.is-visible {
-		display: flex;
-	}
-
-	.mobile-controls .btn {
-		position: static;
-		pointer-events: auto;
-		border: 0;
-		border-radius: 14px;
-		font-size: 30px;
-		font-weight: 700;
-		color: #fff;
-		background: rgba(25, 25, 25, 0.55);
-		box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
-		touch-action: none;
-		user-select: none;
-		-webkit-user-select: none;
-		width: 72px;
-		height: 72px;
-	}
-
-	.mobile-controls .btn.active {
-		background: rgba(255, 255, 255, 0.25);
-		transform: scale(0.96);
-	}
-
 }

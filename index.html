@@ -12,33 +12,53 @@
     <script>
       var unityInstance;
 
-      function ensureMobileControls() {
-        var container = document.getElementById("unityContainer");
-        if (!container) return null;
-
-        var controls = document.getElementById("mobileControls");
-        if (controls) return controls;
-
-        controls = document.createElement("div");
-        controls.id = "mobileControls";
-        controls.className = "mobile-controls";
-        controls.setAttribute("aria-label", "Mobile Steuerung");
-        controls.innerHTML = [
-          '<button class="btn up" data-key="ArrowUp" aria-label="Springen">▲</button>',
-          '<button class="btn down" data-key="ArrowDown" aria-label="Runter">▼</button>'
-        ].join("");
-
-        container.appendChild(controls);
-        return controls;
+      function emitKey(type, key) {
+        var keyCodeMap = { ArrowUp: 38, ArrowDown: 40, ArrowLeft: 37, ArrowRight: 39 };
+        var keyCode = keyCodeMap[key] || 0;
+        var event = new KeyboardEvent(type, {
+          key: key, code: key, keyCode: keyCode, which: keyCode,
+          bubbles: true, cancelable: true
+        });
+        document.dispatchEvent(event);
+        window.dispatchEvent(event);
       }
 
-      function revealMobileControls() {
-        var controls = ensureMobileControls();
-        if (!controls) return;
+      function setupTouchControls() {
+        if (!window.matchMedia("(hover: none) and (pointer: coarse)").matches) return;
 
-        if (window.matchMedia("(hover: none) and (pointer: coarse)").matches) {
-          controls.classList.add("is-visible");
-        }
+        var container = document.getElementById("unityContainer");
+        if (!container) return;
+
+        var LONG_PRESS_MS = 250;
+        var longPressTimer = null;
+        var isLongPress = false;
+
+        container.addEventListener("touchstart", function (e) {
+          e.preventDefault();
+          isLongPress = false;
+          longPressTimer = setTimeout(function () {
+            isLongPress = true;
+            emitKey("keydown", "ArrowDown");
+          }, LONG_PRESS_MS);
+        }, { passive: false });
+
+        container.addEventListener("touchend", function (e) {
+          e.preventDefault();
+          clearTimeout(longPressTimer);
+          if (isLongPress) {
+            emitKey("keyup", "ArrowDown");
+          } else {
+            emitKey("keydown", "ArrowUp");
+            setTimeout(function () { emitKey("keyup", "ArrowUp"); }, 80);
+          }
+          isLongPress = false;
+        }, { passive: false });
+
+        container.addEventListener("touchcancel", function () {
+          clearTimeout(longPressTimer);
+          if (isLongPress) emitKey("keyup", "ArrowDown");
+          isLongPress = false;
+        });
       }
 
       function resizeUnityContainer() {
@@ -68,81 +88,64 @@
         container.style.height = height + "px";
       }
 
-      function setupMobileControls() {
-        var controls = ensureMobileControls();
-        if (!controls) return;
-
-        function emitKey(type, key) {
-          var keyCodeMap = {
-            ArrowUp: 38,
-            ArrowDown: 40,
-            ArrowLeft: 37,
-            ArrowRight: 39
-          };
-          var keyCode = keyCodeMap[key] || 0;
-
-          var event = new KeyboardEvent(type, {
-            key: key,
-            code: key,
-            keyCode: keyCode,
-            which: keyCode,
-            bubbles: true,
-            cancelable: true
-          });
-
-          document.dispatchEvent(event);
-          window.dispatchEvent(event);
-        }
-
-        function bindButton(btn) {
-          var key = btn.getAttribute("data-key");
-          if (!key) return;
-
-          var press = function (e) {
-            e.preventDefault();
-            emitKey("keydown", key);
-            btn.classList.add("active");
-          };
-
-          var release = function (e) {
-            e.preventDefault();
-            emitKey("keyup", key);
-            btn.classList.remove("active");
-          };
-
-          btn.addEventListener("touchstart", press, { passive: false });
-          btn.addEventListener("touchend", release, { passive: false });
-          btn.addEventListener("touchcancel", release, { passive: false });
-          btn.addEventListener("mousedown", press);
-          btn.addEventListener("mouseup", release);
-          btn.addEventListener("mouseleave", release);
-        }
-
-        controls.querySelectorAll(".btn").forEach(bindButton);
-      }
-
       document.addEventListener("DOMContentLoaded", function () {
         unityInstance = UnityLoader.instantiate("unityContainer", "Build/WebKimiRun.json", { onProgress: UnityProgress });
-        setupMobileControls();
+        setupTouchControls();
         resizeUnityContainer();
-
-        var container = document.getElementById("unityContainer");
-        if (container) {
-          container.addEventListener("touchstart", revealMobileControls, { passive: true, once: true });
-          container.addEventListener("mousedown", revealMobileControls, { once: true });
-        }
+        checkOrientation();
       });
 
-      window.addEventListener("resize", resizeUnityContainer);
-      window.addEventListener("orientationchange", resizeUnityContainer);
+      function onFullscreenChange() {
+        var fsEl = document.fullscreenElement ||
+                   document.webkitFullscreenElement ||
+                   document.mozFullScreenElement ||
+                   document.msFullscreenElement;
+        var container = document.getElementById("unityContainer");
+        if (!container) return;
+        if (fsEl) {
+          container.style.width  = window.screen.width  + "px";
+          container.style.height = window.screen.height + "px";
+        } else {
+          resizeUnityContainer();
+        }
+      }
+
+      function requestContainerFullscreen() {
+        var container = document.getElementById("unityContainer");
+        if (!container) return;
+        if (container.requestFullscreen)             container.requestFullscreen();
+        else if (container.webkitRequestFullscreen)  container.webkitRequestFullscreen();
+        else if (container.mozRequestFullScreen)     container.mozRequestFullScreen();
+        else if (container.msRequestFullscreen)      container.msRequestFullscreen();
+        else                                         unityInstance.SetFullscreen(1);
+      }
+
+      function checkOrientation() {
+        if (!window.matchMedia("(hover: none) and (pointer: coarse)").matches) return;
+        var overlay = document.getElementById("rotateOverlay");
+        if (!overlay) return;
+        var isPortrait = window.innerHeight > window.innerWidth;
+        overlay.style.display = isPortrait ? "flex" : "none";
+      }
+
+      window.addEventListener("resize", function () { resizeUnityContainer(); checkOrientation(); });
+      window.addEventListener("orientationchange", function () { resizeUnityContainer(); checkOrientation(); });
+      document.addEventListener("fullscreenchange",       onFullscreenChange);
+      document.addEventListener("webkitfullscreenchange", onFullscreenChange);
+      document.addEventListener("mozfullscreenchange",    onFullscreenChange);
+      document.addEventListener("MSFullscreenChange",     onFullscreenChange);
     </script>
   </head>
   <body>
+    <div id="rotateOverlay" class="rotate-overlay" aria-live="polite">
+      <div class="rotate-icon">&#8635;</div>
+      <p>Bitte drehe dein Gerät ins Querformat</p>
+    </div>
     <div class="webgl-content">
       <div id="unityContainer"></div>
       <div class="footer">
         <div class="webgl-logo"></div>
-        <div class="fullscreen" onclick="unityInstance.SetFullscreen(1)"></div>
+        <div class="fullscreen" onclick="requestContainerFullscreen()"></div>
         <div class="title">Kimi Hindernislauf</div>
       </div>
     </div>
