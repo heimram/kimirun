@@ -88,17 +88,21 @@
         container.style.height = height + "px";
       }
 
-      document.addEventListener("DOMContentLoaded", function () {
+      (function () {
         var _confirm = window.confirm;
         window.confirm = function (msg) {
-          if (msg && msg.indexOf("Unity WebGL") !== -1) return true;
+          if (msg && (msg.indexOf("Unity WebGL") !== -1 || msg.indexOf("mobile") !== -1)) return true;
           return _confirm.apply(this, arguments);
         };
+        var _alert = window.alert;
+        window.alert = function (msg) {
+          if (msg && (msg.indexOf("Unity WebGL") !== -1 || msg.indexOf("mobile") !== -1)) return;
+          return _alert.apply(this, arguments);
+        };
+      })();
 
+      document.addEventListener("DOMContentLoaded", function () {
         unityInstance = UnityLoader.instantiate("unityContainer", "Build/WebKimiRun.json", { onProgress: UnityProgress });
-
-        window.confirm = _confirm;
-
         setupTouchControls();
         resizeUnityContainer();
         checkOrientation();
