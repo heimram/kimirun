@@ -89,7 +89,16 @@
       }
 
       document.addEventListener("DOMContentLoaded", function () {
+        var _confirm = window.confirm;
+        window.confirm = function (msg) {
+          if (msg && msg.indexOf("Unity WebGL") !== -1) return true;
+          return _confirm.apply(this, arguments);
+        };
+
         unityInstance = UnityLoader.instantiate("unityContainer", "Build/WebKimiRun.json", { onProgress: UnityProgress });
+
+        window.confirm = _confirm;
+
         setupTouchControls();
         resizeUnityContainer();
         checkOrientation();
