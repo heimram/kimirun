@@ -76,11 +76,24 @@
         var container = document.getElementById("unityContainer");
         if (!container) return;
 
+        var fsEl = document.fullscreenElement ||
+                   document.webkitFullscreenElement ||
+                   document.mozFullScreenElement ||
+                   document.msFullscreenElement;
+
+        var viewport = window.visualViewport || { width: window.innerWidth, height: window.innerHeight };
+        if (fsEl === container) {
+          container.style.width = Math.round(viewport.width) + "px";
+          container.style.height = Math.round(viewport.height) + "px";
+          layoutUnityCanvas();
+          return;
+        }
+
         var baseWidth = 960;
         var baseHeight = 600;
         var ratio = baseWidth / baseHeight;
-        var viewportWidth = window.innerWidth;
-        var viewportHeight = window.innerHeight;
+        var viewportWidth = Math.round(viewport.width);
+        var viewportHeight = Math.round(viewport.height);
         var footer = document.querySelector(".footer");
         var footerHeight = footer ? footer.offsetHeight + 14 : 52;
         var maxWidth = Math.max(280, viewportWidth - 16);
@@ -96,6 +109,54 @@
 
         container.style.width = width + "px";
         container.style.height = height + "px";
+        layoutUnityCanvas();
+      }
+
+      function layoutUnityCanvas() {
+        var container = document.getElementById("unityContainer");
+        if (!container) return;
+
+        var canvas = container.querySelector("canvas");
+        if (!canvas) {
+          window.requestAnimationFrame(layoutUnityCanvas);
+          return;
+        }
+
+        var fsEl = document.fullscreenElement ||
+                   document.webkitFullscreenElement ||
+                   document.mozFullScreenElement ||
+                   document.msFullscreenElement;
+
+        var isMobile = window.matchMedia("(hover: none) and (pointer: coarse)").matches;
+        var shouldLetterbox = isMobile || fsEl === container;
+
+        if (!shouldLetterbox) {
+          canvas.style.position = "";
+          canvas.style.left = "";
+          canvas.style.top = "";
+          canvas.style.transform = "";
+          canvas.style.width = "100%";
+          canvas.style.height = "100%";
+          return;
+        }
+
+        var baseRatio = 960 / 600;
+        var availableWidth = container.clientWidth;
+        var availableHeight = container.clientHeight;
+
+        var width = availableWidth;
+        var height = Math.round(width / baseRatio);
+        if (height > availableHeight) {
+          height = availableHeight;
+          width = Math.round(height * baseRatio);
+        }
+
+        canvas.style.position = "absolute";
+        canvas.style.left = "50%";
+        canvas.style.top = "50%";
+        canvas.style.transform = "translate(-50%, -50%)";
+        canvas.style.width = width + "px";
+        canvas.style.height = height + "px";
       }
 
       (function () {
@@ -126,22 +187,13 @@
         unityInstance = UnityLoader.instantiate("unityContainer", "Build/WebKimiRun.json", { onProgress: UnityProgress });
         setupTouchControls();
         resizeUnityContainer();
+        layoutUnityCanvas();
         checkOrientation();
       });
 
       function onFullscreenChange() {
-        var fsEl = document.fullscreenElement ||
-                   document.webkitFullscreenElement ||
-                   document.mozFullScreenElement ||
-                   document.msFullscreenElement;
-        var container = document.getElementById("unityContainer");
-        if (!container) return;
-        if (fsEl) {
-          container.style.width  = window.screen.width  + "px";
-          container.style.height = window.screen.height + "px";
-        } else {
-          resizeUnityContainer();
-        }
+        resizeUnityContainer();
+        checkOrientation();
       }
 
       function requestContainerFullscreen() {

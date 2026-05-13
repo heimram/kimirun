@@ -52,6 +52,10 @@ html, body {
 	box-sizing: border-box;
 }
 
+#unityContainer canvas {
+	display: block;
+}
+
 #unityContainer:fullscreen,
 #unityContainer:-webkit-full-screen,
 #unityContainer:-moz-full-screen,
@@ -68,14 +72,9 @@ html, body {
 	padding-bottom: env(safe-area-inset-bottom, 0px);
 	padding-left: env(safe-area-inset-left, 0px);
 	box-sizing: border-box;
-}
-
-#unityContainer:fullscreen canvas,
-#unityContainer:-webkit-full-screen canvas,
-#unityContainer:-moz-full-screen canvas,
-#unityContainer:-ms-fullscreen canvas {
-	width: 100% !important;
-	height: 100% !important;
+	background-size: contain !important;
+	background-position: center center !important;
+	background-repeat: no-repeat !important;
 }
 
 .webgl-content .logo, .progress {position: absolute; left: 50%; top: 50%; -webkit-transform: translate(-50%, -50%); transform: translate(-50%, -50%);}
@@ -101,6 +100,9 @@ html, body {
 		padding-bottom: env(safe-area-inset-bottom, 0px);
 		padding-left: env(safe-area-inset-left, 0px);
 		box-sizing: border-box;
+		background-size: contain !important;
+		background-position: center center !important;
+		background-repeat: no-repeat !important;
 	}
 
 	.webgl-content {
